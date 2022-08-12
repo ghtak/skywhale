@@ -1,7 +1,6 @@
 project(skywhale.tests)
 
 # GoogleTest requires at least C++14
-set(CMAKE_CXX_STANDARD 14)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -20,12 +19,16 @@ file(GLOB_RECURSE TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.cc )
 enable_testing()
 
 add_executable(skywhale.tests ${TESTS})
-target_link_libraries(skywhale.tests GTest::gtest_main)
+target_link_libraries(skywhale.tests skywhale GTest::gtest_main)
 
 add_test(tests skywhale.tests)
 
 include(GoogleTest)
 
-gtest_discover_tests(skywhale.tests)
+#gtest_discover_tests(skywhale.tests)
 
-#add_custom_command(TARGET skywhale.tests POST_BUILD COMMAND ctest -C $<CONFIGURATION> --verbose --output-on-failure )
+add_custom_command(TARGET 
+  skywhale.tests 
+  POST_BUILD COMMAND 
+  ctest -C $<CONFIGURATION> --verbose 
+  --output-on-failure )

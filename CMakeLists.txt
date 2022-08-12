@@ -39,4 +39,5 @@ else()
     )
 endif()
 
+add_subdirectory(skywhale)
 add_subdirectory(tests)
