@@ -3,9 +3,7 @@ cmake_minimum_required(VERSION 3.20)
 project(skywhale)
 
 if(MSVC)
-  add_compile_options("/wd4819")
-  add_compile_options("/wd4127")
-  add_compile_options("/MP")
+  add_compile_options("/wd4819" "/wd4127" "/MP")
   foreach (flag_var
       CMAKE_CXX_FLAGS
       CMAKE_CXX_FLAGS_DEBUG
@@ -23,9 +21,7 @@ if(MSVC)
     string(REPLACE "/W3" "/W4" ${flag_var} "${${flag_var}}")
   endforeach()
 
-  string(REGEX REPLACE "/O2" "Od"
-    CMAKE_CXX_FLAGS_DEBUG
-    "${CMAKE_CXX_FLAGS_DEBUG}")
+  string(REGEX REPLACE "/O2" "Od" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
 
   add_compile_options( /std:c++20 )
 elseif(APPLE)
