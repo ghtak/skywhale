@@ -15,7 +15,7 @@ class shared_block {
     shared_block(shared_block &&rhs) = default;
     shared_block &operator=(shared_block &&rhs) = default;
 
-    char *data(void) const { return _ptr.get(); }
+    char *data(void) { return _ptr.get(); }
 
     std::size_t size(void) const { return _size; }
 

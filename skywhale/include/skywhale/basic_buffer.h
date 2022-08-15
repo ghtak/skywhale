@@ -2,13 +2,19 @@
 #define __skw_basic_buffer_h__
 
 #include <skywhale/shared_block.h>
+#include <skywhale/simple_block.h>
 
 namespace skywhale {
 template <typename BlockT> class basic_buffer {
   public:
-    template <typename... Args>
-    basic_buffer(Args &&...args)
-        : _block(std::forward<Args>(args)...), _gpos(0), _ppos(0) {}
+    template <
+        typename T0, typename... Ts,
+        std::enable_if_t<sizeof...(Ts) || !std::is_same<std::decay_t<T0>,
+                                                        basic_buffer>::value,
+                         int> = 0>
+    basic_buffer(T0 &&t0, Ts &&...ts)
+        : _block(std::forward<T0>(t0), std::forward<Ts>(ts)...), _gpos(0),
+          _ppos(0) {}
 
     basic_buffer(const basic_buffer &rhs) = default;
     basic_buffer &operator=(const basic_buffer &rhs) = default;
@@ -94,6 +100,7 @@ template <typename BlockT> class basic_buffer {
 };
 
 using shared_buffer = basic_buffer<shared_block>;
+using simple_buffer = basic_buffer<simple_block>;
 
 } // namespace skywhale
 
