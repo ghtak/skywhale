@@ -16,18 +16,21 @@ TEST(BasicBufferTest, shared_buffer) {
     buf.reserve(64);
     std::memcpy(buf.pptr(), helloworld, dsize);
     buf.commit(dsize);
+    
+    skywhale::shared_buffer buf2(buf);
 
-    ASSERT_TRUE(buf.pptr() != nullptr);
-    ASSERT_EQ(buf.psize(), 64 - dsize);
+    ASSERT_TRUE(buf2.pptr() != nullptr);
+    ASSERT_EQ(buf2.psize(), 64 - dsize);
 
+    GTEST_COUT << buf2.gptr() << std::endl;
     GTEST_COUT << buf.gptr() << std::endl;
 
     char helloworldb[32];
-    std::memcpy(helloworldb, buf.gptr(), dsize);
-    buf.consume(dsize);
-    buf.shift_data();
-    ASSERT_EQ(buf.gsize(), 0);
-    ASSERT_EQ(buf.psize(), 64);
+    std::memcpy(helloworldb, buf2.gptr(), dsize);
+    buf2.consume(dsize);
+    buf2.shift_data();
+    ASSERT_EQ(buf2.gsize(), 0);
+    ASSERT_EQ(buf2.psize(), 64);
     GTEST_COUT << helloworldb << std::endl;
 }
 

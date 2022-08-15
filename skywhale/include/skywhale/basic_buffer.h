@@ -11,7 +11,7 @@ template <typename BlockT> class basic_buffer {
         typename T0, typename... Ts,
         std::enable_if_t<sizeof...(Ts) || !std::is_same<std::decay_t<T0>,
                                                         basic_buffer>::value,
-                         int> = 0>
+                         std::nullptr_t> = nullptr>
     basic_buffer(T0 &&t0, Ts &&...ts)
         : _block(std::forward<T0>(t0), std::forward<Ts>(ts)...), _gpos(0),
           _ppos(0) {}
