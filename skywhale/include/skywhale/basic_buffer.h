@@ -46,6 +46,47 @@ template <typename BlockT> class basic_buffer {
 
     void consume(std::size_t n) { _gpos += std::min<std::size_t>(n, gsize()); }
 
+    template <typename T> void write(T &&t) {
+        std::size_t n = sizeof(t);
+        reserve(n);
+        memcpy(pptr(), &t, n);
+        commit(n);
+    }
+
+    void write(const char *ptr, std::size_t n) {
+        reserve(n);
+        memcpy(pptr(), ptr, n);
+        commit(n);
+    }
+
+    template <typename T> T peak(void) {
+        T t;
+        std::size_t n = sizeof(t);
+        if (gsize() < n) {
+            throw std::range_error("underflow data");
+        }
+        memcpy(&t, gptr(), n);
+        return t;
+    }
+
+    template <typename T> T read(void) {
+        T t = peak<T>();
+        consume(sizeof(t));
+        return t;
+    }
+
+    void peak(char *ptr, std::size_t n) {
+        if (gsize() < n) {
+            throw std::range_error("underflow data");
+        }
+        memcpy(ptr, gptr(), n);
+    }
+
+    void read(char *ptr, std::size_t n) {
+        peak(ptr, n);
+        consume(n);
+    }
+
   private:
     BlockT _block;
     std::size_t _gpos;
