@@ -2,7 +2,8 @@
 #define __skw_basic_buffer_h__
 
 #include <skywhale/shared_block.h>
-#include <skywhale/simple_block.h>
+#include <skywhale/memory_block.h>
+#include <skywhale/fixed_block.h>
 
 namespace skywhale {
 template <typename BlockT> class basic_buffer {
@@ -101,7 +102,8 @@ template <typename BlockT> class basic_buffer {
 };
 
 using shared_buffer = basic_buffer<shared_block>;
-using simple_buffer = basic_buffer<simple_block>;
+using memory_buffer = basic_buffer<memory_block>;
+using fixed_buffer = basic_buffer<fixed_block>;
 
 } // namespace skywhale
 

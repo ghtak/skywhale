@@ -93,10 +93,10 @@ TEST(BasicBufferTest, shared_buffer_1) {
 }
 
 // Demonstrate some basic assertions.
-TEST(BasicBufferTest, simple_buffer) {
+TEST(BasicBufferTest, memory_buffer) {
     const char *helloworld = "helloworld";
     std::size_t dsize = strlen(helloworld) + 1;
-    skywhale::simple_buffer buf(32);
+    skywhale::memory_buffer buf(32);
     ASSERT_TRUE(buf.pptr() != nullptr);
     ASSERT_EQ(buf.psize(), 32);
 
@@ -104,7 +104,7 @@ TEST(BasicBufferTest, simple_buffer) {
     std::memcpy(buf.pptr(), helloworld, dsize);
     buf.commit(dsize);
 
-    skywhale::simple_buffer buf2(buf);
+    skywhale::memory_buffer buf2(buf);
 
     ASSERT_TRUE(buf2.pptr() != nullptr);
     ASSERT_EQ(buf2.psize(), 64 - dsize);
@@ -120,8 +120,8 @@ TEST(BasicBufferTest, simple_buffer) {
     GTEST_COUT << helloworldb << std::endl;
 }
 
-TEST(BasicBufferTest, simple_buffer_1) {
-    skywhale::simple_buffer read_buffer(2048);
+TEST(BasicBufferTest, memory_buffer_1) {
+    skywhale::memory_buffer read_buffer(2048);
 
     const char *data = "packet data";
     std::size_t op = 0x01;
@@ -175,4 +175,33 @@ TEST(BasicBufferTest, simple_buffer_1) {
             }
         },
         std::range_error);
+}
+
+TEST(BasicBufferTest, fixed_buffer){
+    char buf[4096];
+    skywhale::fixed_buffer buffer(buf, 4096);
+    const char *data = "packet data";
+    std::size_t op = 0x01;
+    std::size_t size = strlen(data);
+
+    buffer.reserve(sizeof(size) + size);
+
+    buffer.write(op);
+    buffer.write(size);
+    buffer.write(data, size);
+    ASSERT_EQ(buffer.gsize(), sizeof(op) + sizeof(size) + size);
+
+    std::size_t rop = 0;
+    std::size_t rsize = 0;
+    char rdata[32];
+    
+    rop = buffer.read<std::size_t>();
+    rsize = buffer.read<std::size_t>();
+    buffer.read(rdata, rsize);
+   
+    rdata[rsize] = 0;
+
+    ASSERT_EQ(op, rop);
+    ASSERT_EQ(size, rsize);
+    ASSERT_STREQ(data, rdata);
 }
