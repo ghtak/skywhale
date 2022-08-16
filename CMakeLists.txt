@@ -31,7 +31,9 @@ else()
   add_compile_options( 
     -g -ggdb 
     -Wall -W 
-    -std=c++2a -fconcepts 
+    -std=c++2a 
+    #-fconcepts 
+    #-fsanitize=address
     )
 endif()
 

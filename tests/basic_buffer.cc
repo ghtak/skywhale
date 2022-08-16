@@ -16,7 +16,7 @@ TEST(BasicBufferTest, shared_buffer) {
     buf.reserve(64);
     std::memcpy(buf.pptr(), helloworld, dsize);
     buf.commit(dsize);
-    
+
     skywhale::shared_buffer buf2(buf);
 
     ASSERT_TRUE(buf2.pptr() != nullptr);
@@ -33,7 +33,6 @@ TEST(BasicBufferTest, shared_buffer) {
     ASSERT_EQ(buf2.psize(), 64);
     GTEST_COUT << helloworldb << std::endl;
 }
-
 
 TEST(BasicBufferTest, shared_buffer_1) {
     skywhale::shared_buffer read_buffer(2048);
@@ -74,6 +73,7 @@ TEST(BasicBufferTest, shared_buffer_1) {
         memcpy(rdata, read_buffer.gptr(), rsize);
         read_buffer.consume(rsize);
     }
+
     rdata[rsize] = 0;
 
     ASSERT_EQ(op, rop);
@@ -91,7 +91,6 @@ TEST(BasicBufferTest, shared_buffer_1) {
         },
         std::range_error);
 }
-
 
 // Demonstrate some basic assertions.
 TEST(BasicBufferTest, simple_buffer) {
@@ -120,7 +119,6 @@ TEST(BasicBufferTest, simple_buffer) {
     ASSERT_EQ(buf2.psize(), 64);
     GTEST_COUT << helloworldb << std::endl;
 }
-
 
 TEST(BasicBufferTest, simple_buffer_1) {
     skywhale::simple_buffer read_buffer(2048);

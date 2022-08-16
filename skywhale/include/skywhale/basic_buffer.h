@@ -45,7 +45,7 @@ template <typename BlockT> class basic_buffer {
         if (ps >= n)
             return;
 
-        _block.resize(_ppos + n);
+        _block.resize(_ppos + n, gsize());
     }
 
     void commit(std::size_t n) { _ppos += std::min<std::size_t>(n, psize()); }
@@ -63,6 +63,7 @@ template <typename BlockT> class basic_buffer {
         reserve(n);
         memcpy(pptr(), ptr, n);
         commit(n);
+        std::cerr << n << std::endl;
     }
 
     template <typename T> T peak(void) {

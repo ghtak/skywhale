@@ -27,8 +27,8 @@ include(GoogleTest)
 
 #gtest_discover_tests(skywhale.tests)
 
-add_custom_command(TARGET 
-  skywhale.tests 
-  POST_BUILD COMMAND 
-  ctest -C $<CONFIGURATION> --verbose 
-  --output-on-failure )
+#add_custom_command(TARGET 
+#  skywhale.tests 
+#  POST_BUILD COMMAND 
+#  ctest -C $<CONFIGURATION> --verbose 
+#  --output-on-failure )

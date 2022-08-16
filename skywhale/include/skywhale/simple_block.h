@@ -7,7 +7,7 @@ namespace skywhale {
 
 class simple_block {
   public:
-    explicit simple_block(std::size_t N) { _data.resize(N, 0); }
+    explicit simple_block(std::size_t N) : _data(N, 0) {}
 
     simple_block(const simple_block &rhs) = default;
     simple_block &operator=(const simple_block &rhs) = default;
@@ -18,9 +18,8 @@ class simple_block {
 
     std::size_t size(void) const { return _data.size(); }
 
-    void resize(std::size_t n) {
-        _data.resize(n, 0);
-    }
+    void resize(std::size_t n, std::size_t) { _data.resize(n, 0); }
+
   private:
     std::vector<char> _data;
 };
