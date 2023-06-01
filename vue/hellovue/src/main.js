@@ -1,6 +1,10 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
-import App from './App.vue'
+import Main from './Main0.vue'
 
-createApp(App).mount('#app')
+const app = createApp(Main).mount('#app')
+
+app.config.errorHandler = (err) => {
+    console.log(err)
+}
