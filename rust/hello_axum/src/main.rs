@@ -3,11 +3,12 @@ use axum::{
     extract::Query,
     response::Html,
     http::StatusCode,
-    response::IntoResponse,
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
+use serde::{
+    Deserialize, 
+    Serialize
+};
 
 
 #[tokio::main]
