@@ -29,7 +29,7 @@ async fn get_impl() -> Result<&'static str, ErrorCode> {
     return if rng.gen::<i32>() % 2 == 0 {
         Ok("Hello World")
     } else {
-        Err(crate::error::ErrorCode::Unknown("Hello ErrorCode"))
+        Err(ErrorCode::INVALID_PARAMETER)
     }
 
 }
