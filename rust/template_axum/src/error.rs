@@ -12,23 +12,15 @@ impl ErrorCode {
     }
 }
 
-macro_rules! error_codes{
-    (
-        $(
-            ($value:expr, $code:ident, $message:expr);
-        )+
-    ) => {
+macro_rules! error_codes {
+    ( $( ($value:expr, $code:ident, $message:expr); )+ ) => {
         impl ErrorCode {
-            $(
-            pub const $code: ErrorCode = ErrorCode($value);
-            )+
+            $( pub const $code: ErrorCode = ErrorCode($value); )+
         }
 
-        fn error_message_impl   456(value:u32) -> Option<&'static str> {
+        fn error_message_impl(value:u32) -> Option<&'static str> {
             match value {
-                $(
-                $value => Some($message),
-                )+
+                $( $value => Some($message), )+
                 _ => None
             }
         }
@@ -40,7 +32,7 @@ error_codes! {
 }
 
 
-impl IntoResponse for ErrorCode{
+impl IntoResponse for ErrorCode {
     fn into_response(self) -> Response {
         let body = Json(json!({
             "error": self.message()
