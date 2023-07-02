@@ -1,0 +1,22 @@
+[2m2023-07-02T11:16:34.803121Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T11:16:34.803222Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T11:16:34.803451Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 127 bytes
+[2m2023-07-02T11:16:36.352063Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T11:16:36.352210Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T11:16:36.352471Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 127 bytes
+[2m2023-07-02T11:16:36.800027Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T11:16:36.800122Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T11:16:36.800265Z[0m [34mDEBUG[0m [2mtemplate_axum[0m[2m:[0m UnknownError
+[2m2023-07-02T11:16:36.800462Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 222 bytes
+[2m2023-07-02T11:17:40.614767Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m read eof
+[2m2023-07-02T11:18:39.296652Z[0m [34mDEBUG[0m [2mtemplate_axum[0m[2m:[0m Tracing initialized.
+[2m2023-07-02T11:18:39.297026Z[0m [34mDEBUG[0m [2mtemplate_axum[0m[2m:[0m listening on 0.0.0.0:8009
+[2m2023-07-02T11:18:40.454089Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T11:18:40.454211Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T11:18:40.454620Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 127 bytes
+[2m2023-07-02T11:18:41.877093Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T11:18:41.877203Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T11:18:41.877386Z[0m [32m INFO[0m [2mtemplate_axum[0m[2m:[0m UnknownError
+[2m2023-07-02T11:18:41.877704Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 222 bytes
+[2m2023-07-02T11:18:57.092192Z[0m [32m INFO[0m [2mtemplate_axum[0m[2m:[0m UnknownError
+[2m2023-07-02T11:18:58.182862Z[0m [32m INFO[0m [2mtemplate_axum[0m[2m:[0m UnknownError

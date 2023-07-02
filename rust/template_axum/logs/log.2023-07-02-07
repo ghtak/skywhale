@@ -1,0 +1,21 @@
+[2m2023-07-02T07:28:42.348681Z[0m [34mDEBUG[0m [2mtemplate_axum[0m[2m:[0m Tracing initialized.
+[2m2023-07-02T07:28:42.349076Z[0m [34mDEBUG[0m [2mtemplate_axum[0m[2m:[0m listening on 0.0.0.0:8009
+[2m2023-07-02T07:28:46.890747Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T07:28:46.890996Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T07:28:46.891834Z[0m [34mDEBUG[0m [2mtemplate_axum[0m[2m:[0m UnknownError
+[2m2023-07-02T07:28:46.892830Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 152 bytes
+[2m2023-07-02T07:28:50.165500Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T07:28:50.165603Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T07:28:50.165902Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 128 bytes
+[2m2023-07-02T07:28:51.613696Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T07:28:51.613826Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T07:28:51.614079Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 128 bytes
+[2m2023-07-02T07:28:52.565877Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T07:28:52.565987Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T07:28:52.566223Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 128 bytes
+[2m2023-07-02T07:28:53.246427Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m parsed 16 headers
+[2m2023-07-02T07:28:53.246545Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m incoming body is empty
+[2m2023-07-02T07:28:53.246723Z[0m [34mDEBUG[0m [2mtemplate_axum[0m[2m:[0m UnknownError
+[2m2023-07-02T07:28:53.246922Z[0m [34mDEBUG[0m [2mhyper::proto::h1::io[0m[2m:[0m flushed 152 bytes
+[2m2023-07-02T07:29:47.310266Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m read eof
+[2m2023-07-02T07:33:54.405906Z[0m [34mDEBUG[0m [2mhyper::proto::h1::conn[0m[2m:[0m read eof

@@ -1,3 +1,5 @@
+mod error;
+
 use std::thread;
 use std::sync::{mpsc, Mutex, Arc};
 

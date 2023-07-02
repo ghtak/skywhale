@@ -24,7 +24,7 @@ impl<T: ?Sized> NonNull<T> {
 
 fn static_message_check(m : &'static str) {
     let v = m as *const _ as *const () as i64;
-    println!("{:#34b} {:#x} {:?} {:?} {:#34b}",v, v,v, mem::size_of_val(&m), TAG_MASK);
+    println!("{:#34b} {:#x} {:?} {:?} {:#34b}",v, v, v, mem::size_of_val(&m), TAG_MASK);
     unsafe {
         let ptr = NonNull{
             pointer: (m as *const _ as *mut ()) as _
