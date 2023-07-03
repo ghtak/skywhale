@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::ops::Add;
 
 enum Poll<T>{
     Ready(T),
@@ -73,7 +74,26 @@ impl Future for MyFuture{
     }
 }
 
+struct AddOneFuture<T>(T);
+
+impl<T> Future for AddOneFuture<T>
+    where
+        T : Future,
+        T::Output: std::ops::Add<i32, Output = i32>,
+{
+    type Output = i32;
+
+    fn poll(&mut self, ctx: &Context) -> Poll<Self::Output> {
+        match self.0.poll(ctx) {
+            Poll::Ready(cnt) => Poll::Ready(cnt+1),
+            _ => Poll::Pending
+        }
+    }
+}
+
 pub(crate) fn local_main(){
     let my_future = MyFuture::default();
-    println!("Output {}", run(my_future));
+    println!("Output {}", run(
+        AddOneFuture(my_future))
+    );
 }
