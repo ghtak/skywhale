@@ -1,42 +1,67 @@
 use std::cell::RefCell;
+#[allow(unused_imports)]
 use std::ops::Add;
-
-enum Poll<T>{
-    Ready(T),
-    Pending,
-}
-
-trait Future {
-    type Output;
-
-    fn poll(&mut self, ctx: &Context) -> Poll<Self::Output>;
-}
 
 thread_local!(static NOTIFY: RefCell<bool> = RefCell::new(true));
 
-struct Context<'a>{
-    waker: &'a Waker
-}
+pub mod task{
+    use crate::future::NOTIFY;
 
-impl<'a> Context<'a> {
-    fn from_waker(waker: &'a Waker) -> Self {
-        Context{ waker }
+    pub struct Context<'a>{
+        waker: &'a Waker
     }
 
-    fn waker(&self) -> &'a Waker {
-        &self.waker
+    impl<'a> Context<'a> {
+        pub fn from_waker(waker: &'a Waker) -> Self {
+            Context{ waker }
+        }
+
+        pub fn waker(&self) -> &'a Waker {
+            &self.waker
+        }
+    }
+
+    pub struct Waker;
+
+    impl Waker {
+        pub fn wake(&self) {
+            NOTIFY.with(|f| *f.borrow_mut() = true)
+        }
     }
 }
 
-struct Waker;
+pub mod future{
+    use crate::future::task::Context;
+    pub enum Poll<T>{
+        Ready(T),
+        Pending,
+    }
 
-impl Waker {
-    fn wake(&self) {
-        NOTIFY.with(|f| *f.borrow_mut() = true)
+    pub trait Future {
+        type Output;
+
+        fn poll(&mut self, ctx: &Context) -> Poll<Self::Output>;
+    }
+
+    pub struct Ready<T>(Option<T>);
+
+    impl<T> Future for Ready<T> {
+        type Output = T;
+
+        fn poll(&mut self, _ctx: &Context) -> Poll<Self::Output> {
+            Poll::Ready(self.0.take().unwrap())
+        }
+    }
+
+    pub fn ready<T>(val: T) -> Ready<T> {
+        Ready(Some(val))
     }
 }
 
-fn run<F>(mut f: F) -> F::Output
+use crate::future::future::{ Future, Poll };
+use crate::future::task::{ Context, Waker };
+
+fn block_on<F>(mut f: F) -> F::Output
 where
     F: Future
 {
@@ -52,6 +77,35 @@ where
         }
     })
 }
+
+pub(crate) fn local_main(){
+    let fut = future::ready(1);
+    println!("{}", block_on(fut));
+    /*
+    let my_future = MyFuture::default();
+    println!("Output {}", run(
+        AddOneFuture(my_future))
+    );*/
+
+    /*
+        let my_future = future::ready(1)
+        .map(|x| x + 3)
+        .map(Ok)
+        .map_err(|e: ()| format!("Error: {:?}", e))
+        .and_then(|x| future::ready(Ok(x - 3)))
+        .then(|res| {
+            future::ready(match res {
+                Ok(val) => Ok(val + 3),
+                err => err,
+            })
+        });
+
+    let val = block_on(my_future);
+    assert_eq!(val, Ok(4));
+     */
+}
+
+
 
 #[derive(Default)]
 struct MyFuture{
@@ -89,11 +143,4 @@ impl<T> Future for AddOneFuture<T>
             _ => Poll::Pending
         }
     }
-}
-
-pub(crate) fn local_main(){
-    let my_future = MyFuture::default();
-    println!("Output {}", run(
-        AddOneFuture(my_future))
-    );
 }
