@@ -1,5 +1,5 @@
 [package]
-name = "hello_tokio"
+name = "hellorust"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,3 @@ edition = "2021"
 
 [dependencies]
 thiserror = "1.0.40"
-tokio = { version = "1", features = ["full"] }
-tracing = "0.1.37"
-tracing-appender = "0.2.2"
-tracing-subscriber = "0.3.17"

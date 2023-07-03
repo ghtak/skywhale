@@ -9,9 +9,15 @@ pub enum ErrorCode{
     IoError(#[from] io::Error),
     #[error("Unknown Error")]
     UnknownError,
+
+    #[error("SrcToDst {src} {dst}")]
+    SrcToDst{
+        src: String,
+        dst: String
+    }
 }
 
-pub(crate) fn error_into() -> ErrorCode {
+pub fn error_into() -> ErrorCode {
     io::Error::from(io::ErrorKind::Interrupted).into()
 }
 

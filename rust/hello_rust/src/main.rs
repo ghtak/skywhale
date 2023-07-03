@@ -15,4 +15,8 @@ use error::ErrorCode;
 fn main(){
     //println!("{:?}", ErrorCode::IoError(Error::from(io::ErrorKind::Interrupted)));
     println!("{:?}", error::error_into());
+    println!("{}", ErrorCode::SrcToDst {
+        src : String::from("SrcParam"),
+        dst : String::from("DstParam")
+    }.to_string());
 }
