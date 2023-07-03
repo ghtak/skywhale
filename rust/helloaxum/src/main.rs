@@ -2,6 +2,7 @@ use axum::Router;
 use axum::routing::get;
 use dotenv::dotenv;
 use tracing::debug;
+use crate::error::ErrorCode;
 
 use crate::utils::init_tracing;
 
@@ -18,10 +19,16 @@ async fn main() {
     debug!("{}", port);
 
     let addr = format!("0.0.0.0:{}", port);
-    let router_main = Router::new().route("/", get(|| async { "Hello Axum" }));
+    let router_main = Router::new().route("/",
+                                          //get(|| async { "Hello Axum" }));
+                                          get(hello_axum));
 
     axum::Server::bind(&(addr.parse().unwrap()))
         .serve(router_main.into_make_service())
         .await
         .unwrap();
+}
+
+async fn hello_axum() -> Result<&'static str, ErrorCode> {
+    return Ok("Hello Axum")
 }
