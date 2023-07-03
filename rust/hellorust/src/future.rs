@@ -1,6 +1,4 @@
 use std::cell::RefCell;
-#[allow(unused_imports)]
-use std::ops::Add;
 
 thread_local!(static NOTIFY: RefCell<bool> = RefCell::new(true));
 
@@ -41,6 +39,57 @@ pub mod future{
         type Output;
 
         fn poll(&mut self, ctx: &Context) -> Poll<Self::Output>;
+
+        fn map<F, U>(self, f: F) -> Map<Self, F>
+        where
+            F: FnOnce(Self::Output) -> U,
+            Self: Sized,
+        {
+            Map {
+                future: self,
+                f
+            }
+        }
+
+        fn then<Fut, F>(self,f: F) -> Then<Self, F>
+        where
+            F: FnOnce(Self::Output) -> Fut,
+            Fut: Future,
+            Self: Sized,
+        {
+            Then{
+                future: self,
+                f
+            }
+        }
+    }
+
+    pub trait TryFuture {
+        type Ok;
+        type Error;
+
+        fn try_poll(&mut self, ctx: &Context) -> Poll<Result<Self::Ok, Self::Error>>;
+
+        fn and_then<Fut, F>(self, f: F) -> AndThen<Self, F>
+        where
+            F: FnOnce(Self::Ok) -> Fut,
+            Fut: Future,
+            Self: Sized,
+        {
+            AndThen {
+                future: self,
+                f
+            }
+        }
+    }
+
+    impl<F, T, E> TryFuture for F where F : Future<Output=Result<T,E>> {
+        type Ok =T;
+        type Error =E;
+
+        fn try_poll(&mut self, ctx: &Context) -> Poll<F::Output> {
+            self.poll(ctx)
+        }
     }
 
     pub struct Ready<T>(Option<T>);
@@ -56,9 +105,79 @@ pub mod future{
     pub fn ready<T>(val: T) -> Ready<T> {
         Ready(Some(val))
     }
+
+    pub struct Map<Fut, F> {
+        future: Fut,
+        f: F
+    }
+
+    impl<Fut, F, U> Future for Map<Fut, F>
+    where
+        Fut: Future,
+        F: FnOnce(Fut::Output) -> U + Copy
+    {
+        type Output = U;
+
+        fn poll(&mut self, ctx: &Context) -> Poll<Self::Output> {
+            match self.future.poll(ctx) {
+                Poll::Ready(val) => {
+                    let v = (self.f)(val);
+                    Poll::Ready(v)
+                },
+                _ => Poll::Pending
+            }
+        }
+    }
+
+    pub struct Then<Fut, F>{
+        future: Fut,
+        f: F
+    }
+
+    impl<Fut, NextFut, F> Future for Then<Fut,F>
+    where
+        Fut: Future,
+        NextFut: Future,
+        F: FnOnce(Fut::Output) -> NextFut + Copy,
+    {
+        type Output = NextFut::Output;
+
+        fn poll(&mut self, ctx: &Context) -> Poll<Self::Output> {
+            match self.future.poll(ctx) {
+                Poll::Ready(val) => {
+                    ((self.f)(val)).poll(ctx)
+                },
+                _ => Poll::Pending
+            }
+        }
+    }
+
+    pub struct AndThen<Fut, F> {
+        future: Fut,
+        f: F,
+    }
+
+    impl<Fut, NextFut, F> Future for AndThen<Fut, F>
+    where
+        Fut: TryFuture,
+        NextFut: TryFuture<Error = Fut::Error>,
+        F: FnOnce(Fut::Ok) -> NextFut + Copy,
+    {
+        type Output = Result<NextFut::Ok, Fut::Error>;
+
+        fn poll(&mut self, cx: &Context) -> Poll<Self::Output> {
+            match self.future.try_poll(cx) {
+                Poll::Ready(Ok(val)) => {
+                    (self.f)(val).try_poll(cx)
+                }
+                Poll::Ready(Err(err)) => Poll::Ready(Err(err)),
+                Poll::Pending => Poll::Pending,
+            }
+        }
+    }
 }
 
-use crate::future::future::{ Future, Poll };
+use crate::future::future::{Future, Poll, TryFuture};
 use crate::future::task::{ Context, Waker };
 
 fn block_on<F>(mut f: F) -> F::Output
@@ -78,9 +197,14 @@ where
     })
 }
 
+
 pub(crate) fn local_main(){
-    let fut = future::ready(1);
-    println!("{}", block_on(fut));
+    let fut = future::ready(1)
+        .map(|val| val + 1)
+        .then(|val| future::ready(val + 1))
+        .map(Ok::<i32, ()>)
+        .and_then(|val| future::ready(Ok(val * 4)));
+    println!("{:?}", block_on(fut));
     /*
     let my_future = MyFuture::default();
     println!("Output {}", run(
