@@ -8,6 +8,8 @@ use crate::utils::init_tracing;
 
 mod error;
 mod utils;
+mod routers;
+mod dtos;
 
 #[tokio::main]
 async fn main() {
@@ -19,9 +21,9 @@ async fn main() {
     debug!("{}", port);
 
     let addr = format!("0.0.0.0:{}", port);
-    let router_main = Router::new().route("/",
-                                          //get(|| async { "Hello Axum" }));
-                                          get(hello_axum));
+    let router_main = Router::new()
+        .route("/", get(hello_axum))//get(|| async { "Hello Axum" }));
+        .nest( "/api/v1/user", routers::v1::user::router());
 
     axum::Server::bind(&(addr.parse().unwrap()))
         .serve(router_main.into_make_service())
