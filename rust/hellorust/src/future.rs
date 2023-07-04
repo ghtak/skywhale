@@ -81,6 +81,17 @@ pub mod future{
                 f
             }
         }
+
+        fn map_error<R, F>(self, f: F) -> MapErr<Self, F>
+        where
+            F: FnOnce(Self::Error) -> R,
+            Self: Sized,
+        {
+            MapErr{
+                future: self,
+                f
+            }
+        }
     }
 
     impl<F, T, E> TryFuture for F where F : Future<Output=Result<T,E>> {
@@ -175,6 +186,32 @@ pub mod future{
             }
         }
     }
+
+    pub struct MapErr<Fut, F>{
+        future: Fut,
+        f: F
+    }
+
+    impl<Fut, F, R> Future for MapErr<Fut, F>
+    where
+        Fut: TryFuture,
+        F: FnOnce(Fut::Error) -> R + Copy,
+    {
+        type Output = Result<Fut::Ok, R>;
+
+        fn poll(&mut self, ctx: &Context) -> Poll<Self::Output> {
+            match self.future.try_poll(ctx) {
+                Poll::Ready(result) => {
+                    //Poll::Ready(result.map_err((self.f)))
+                    match result {
+                        Ok(v) => Poll::Ready(Ok(v)),
+                        Err(e) => Poll::Ready(Err((self.f)(e)))
+                    }
+                },
+                _ => Poll::Pending
+            }
+        }
+    }
 }
 
 use crate::future::future::{Future, Poll, TryFuture};
@@ -203,7 +240,8 @@ pub(crate) fn local_main(){
         .map(|val| val + 1)
         .then(|val| future::ready(val + 1))
         .map(Ok::<i32, ()>)
-        .and_then(|val| future::ready(Ok(val * 4)));
+        .and_then(|val| future::ready(Ok(val * 4)))
+        .map_error(|_:()| 5);
     println!("{:?}", block_on(fut));
     /*
     let my_future = MyFuture::default();
