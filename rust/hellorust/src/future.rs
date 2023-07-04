@@ -243,28 +243,6 @@ pub(crate) fn local_main(){
         .and_then(|val| future::ready(Ok(val * 4)))
         .map_error(|_:()| 5);
     println!("{:?}", block_on(fut));
-    /*
-    let my_future = MyFuture::default();
-    println!("Output {}", run(
-        AddOneFuture(my_future))
-    );*/
-
-    /*
-        let my_future = future::ready(1)
-        .map(|x| x + 3)
-        .map(Ok)
-        .map_err(|e: ()| format!("Error: {:?}", e))
-        .and_then(|x| future::ready(Ok(x - 3)))
-        .then(|res| {
-            future::ready(match res {
-                Ok(val) => Ok(val + 3),
-                err => err,
-            })
-        });
-
-    let val = block_on(my_future);
-    assert_eq!(val, Ok(4));
-     */
 }
 
 
