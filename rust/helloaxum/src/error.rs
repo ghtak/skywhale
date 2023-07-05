@@ -1,4 +1,5 @@
 use std::io;
+use axum::http::Uri;
 use axum::response::{IntoResponse, Response};
 use hyper::StatusCode;
 use serde_json::json;
@@ -31,6 +32,12 @@ pub enum Error{
 
     #[error("Method Not Allowed")]
     MethodNotAllowed,
+
+    #[error("Not Found{0:?}")]
+    NotFound(Uri),
+
+    #[error("Unhandled Error {0:?}")]
+    UnhandledError(Box<dyn std::error::Error>),
 }
 
 impl IntoResponse for Error{
