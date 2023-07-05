@@ -3,12 +3,14 @@ use axum::{
     http::StatusCode,
     Router,
     routing::get};
+use axum::http::Method;
 use dotenv::dotenv;
 use tower_http::services::ServeDir;
 use tracing::debug;
 
 use crate::utils::init_tracing;
 use crate::error::Result;
+use tower_http::cors::{Any, CorsLayer};
 
 mod error;
 mod utils;
@@ -37,6 +39,13 @@ async fn main() {
         .route("/", get(hello_axum))//get(|| async { "Hello Axum" }));
         .nest("/api/v1/user", routers::v1::user::router())
         .nest("/api/v1/login", routers::v1::login::router())
+        .layer(
+            CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST])
+                // allow requests from any origin
+                .allow_origin(Any)
+                //.allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
+        )
         .fallback_service(
             Router::new().nest_service("/static", serve_dir)
         );
