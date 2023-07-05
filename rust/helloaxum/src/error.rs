@@ -22,6 +22,12 @@ pub enum Error{
     MissingJsonContentType(String),
     #[error("JsonRejection {0}")]
     JsonRejection(String),
+
+    #[error("PathError {message} {location:?}")]
+    PathError{
+        message: String,
+        location: Option<String>
+    }
 }
 
 impl IntoResponse for Error{

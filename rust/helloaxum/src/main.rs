@@ -14,6 +14,7 @@ mod error;
 mod utils;
 mod routers;
 mod dtos;
+mod customext;
 
 async fn handle_404() -> (StatusCode, &'static str) {
     (StatusCode::NOT_FOUND, "Not found")

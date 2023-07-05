@@ -1,11 +1,14 @@
-use axum::extract::Path;
 use axum::{Json, Router};
 use axum::routing::get;
 use hyper::StatusCode;
 use crate::dtos::user::{User, Users};
 use crate::error::{ Error, Result };
 use uuid::Uuid;
-
+use crate::customext;
+use serde::{
+    Serialize,
+    Deserialize
+};
 
 async fn users() -> Result<Json<Users>> {
     Ok(
@@ -31,8 +34,12 @@ async fn create_user() -> Result<(StatusCode, Json<User>)> {
     Err(Error::NotImplemented)
 }
 
-async fn user_detail(Path(id):Path<u32>) -> Result<(StatusCode,String)> {
+async fn user_detail(customext::Path(id):customext::Path<u32>) -> Result<(StatusCode,String)> {
     //Ok( (StatusCode::CREATED, id.to_string()))
+    Err(Error::NotImplemented)
+}
+
+async fn path_test(customext::Path(params): customext::Path<Param>) -> Result<&'static str>{
     Err(Error::NotImplemented)
 }
 
@@ -40,4 +47,11 @@ pub fn router() -> Router {
     Router::new()
         .route("/", get(users).post(create_user))
         .route("/:id", get(user_detail))
+        .route("/path_test/:a_id/:b_id", get(path_test))
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Param {
+    a_id: u32,
+    b_id: u32,
 }

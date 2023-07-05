@@ -1,10 +1,7 @@
-use axum::extract::rejection::JsonRejection;
-use axum_macros::FromRequest;
 use tracing::debug;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::fmt;
 use tracing_subscriber::layer::SubscriberExt;
-use crate::error::Error;
 
 pub fn init_tracing() -> WorkerGuard {
     let file_appender = tracing_appender::rolling::hourly("./logs", "log");
@@ -17,19 +14,4 @@ pub fn init_tracing() -> WorkerGuard {
     ).expect("Unable to set global tracing subscriber");
     debug!("Tracing initialized.");
     guard
-}
-
-#[derive(FromRequest)]
-#[from_request(via(axum::Json), rejection(Error))]
-pub struct JsonParam<T>(pub T);
-
-impl From<JsonRejection> for Error {
-    fn from(rejection: JsonRejection) -> Self {
-        return match rejection {
-            JsonRejection::JsonDataError(_) => Error::JsonDataError(rejection.to_string()),
-            JsonRejection::JsonSyntaxError(_) => Error::JsonSyntaxError(rejection.to_string()),
-            JsonRejection::MissingJsonContentType(_) => Error::MissingJsonContentType(rejection.to_string()),
-            _ => Error::JsonRejection(rejection.to_string()),
-        }
-    }
 }
