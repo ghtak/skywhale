@@ -1,10 +1,15 @@
+use std::convert::Infallible;
+
 use axum::async_trait;
+use axum::body::HttpBody;
 use axum::extract::{FromRequest, FromRequestParts, MatchedPath};
 use axum::extract::path::ErrorKind;
 use axum::extract::rejection::{JsonRejection, PathRejection};
+use axum::handler::Handler;
 use axum::http::Request;
 use axum::http::request::Parts;
 use axum::RequestPartsExt;
+use axum::routing::MethodRouter;
 use serde::de::DeserializeOwned;
 
 use crate::error::Error;
@@ -133,3 +138,79 @@ impl<S, T> FromRequestParts<S> for Path<T>
         }
     }
 }
+
+pub trait FallbackCustomMethodNotAllowed<S, B> {
+    fn wrap(self) -> MethodRouter<S, B, Infallible>;
+}
+
+impl<S, B> FallbackCustomMethodNotAllowed<S, B> for MethodRouter<S, B, Infallible>
+    where
+        B: HttpBody + Send + 'static,
+        S: Clone + Send + Sync + 'static
+{
+    fn wrap(self) -> MethodRouter<S, B, Infallible> {
+        let mut this = self;
+        this.fallback(|| async {
+            Error::MethodNotAllowed
+        })
+    }
+}
+
+// pub fn router() -> Router {
+//     Router::new()
+//         .route("/",
+//                get(users).post(create_user).wrap())
+//         .route("/:id", get(user_detail))
+//         .route("/path_test/:a_id/:b_id", get(path_test))
+// }
+
+// pub fn wrap<S, B>(r: MethodRouter<S, B, Infallible>) -> MethodRouter<S, B, Infallible>
+// where
+//     B: HttpBody + Send + 'static,
+//     S: Clone + Send + Sync + 'static
+// {
+//     r.fallback(
+//         || async {
+//            Error::MethodNotAllowed
+//        }
+//     )
+// }
+
+
+// macro_rules! custom_fallback_method_router{
+//     (
+//         $method_name:ident
+//     ) => {
+//         pub fn $method_name<H, T, S, B>(handler: H) -> MethodRouter<S, B, Infallible>
+//                 where
+//                     H: Handler<T, S, B>,
+//                     B: HttpBody + Send + 'static,
+//                     T: 'static,
+//                     S: Clone + Send + Sync + 'static
+//         {
+//             axum::routing::$method_name(handler).fallback(
+//                 || async {
+//                    Error::MethodNotAllowed
+//                }
+//             )
+//         }
+//     }
+// }
+//
+// custom_fallback_method_router!(get);
+// custom_fallback_method_router!(post);
+
+/*
+pub fn post<H, T, S, B>(handler: H) -> MethodRouter<S, B, Infallible>
+        where
+            H: Handler<T, S, B>,
+            B: HttpBody + Send + 'static,
+            T: 'static,
+            S: Clone + Send + Sync + 'static
+{
+    axum::routing::post(handler).fallback(
+        || async {
+           Error::MethodNotAllowed
+       }
+    )
+}*/

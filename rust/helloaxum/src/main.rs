@@ -1,16 +1,17 @@
-use axum::{
-    handler::HandlerWithoutStateExt,
-    http::StatusCode,
-    Router,
-    routing::get};
-use axum::http::Method;
+use std::time::Duration;
+
+use axum::{BoxError, handler::HandlerWithoutStateExt, http::StatusCode, Router, routing::get};
+use axum::error_handling::HandleErrorLayer;
+use axum::http::{Method, Response};
 use dotenv::dotenv;
+use tower::ServiceBuilder;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::services::ServeDir;
+use tower_http::trace::TraceLayer;
 use tracing::debug;
 
+use crate::error::{Error, Result};
 use crate::utils::init_tracing;
-use crate::error::Result;
-use tower_http::cors::{Any, CorsLayer};
 
 mod error;
 mod utils;
@@ -33,22 +34,33 @@ async fn main() {
 
     let addr = format!("0.0.0.0:{}", port);
 
-    let service = handle_404.into_service();
-    let serve_dir = ServeDir::new("static").not_found_service(service);
+    //let service = handle_404.into_service();
+    //let serve_dir = ServeDir::new("static").not_found_service(service);
     let router_main = Router::new()
-        .route("/", get(hello_axum))//get(|| async { "Hello Axum" }));
-        .nest("/api/v1/user", routers::v1::user::router())
-        .nest("/api/v1/login", routers::v1::login::router())
-        .layer(
-            CorsLayer::new()
-                .allow_methods([Method::GET, Method::POST])
-                // allow requests from any origin
-                .allow_origin(Any)
-                //.allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
-        )
-        .fallback_service(
-            Router::new().nest_service("/static", serve_dir)
+        .route("/", get(hello_axum))
+        .nest_service("/api/v1/user", routers::v1::user::router())
+        .nest_service("/api/v1/login",
+              routers::v1::login::router()
+        ).fallback(
+           |uri: axum::http::Uri| async move {
+               (StatusCode::NOT_FOUND, format!("NotFound {:?}", uri))}
         );
+        //.layer(utils::cors())
+        // .layer(
+        //     ServiceBuilder::new()
+        //         .layer(HandleErrorLayer::new(|error: BoxError| async move {
+        //             debug!("{:?}", error);
+        //         }))
+        //         .timeout(Duration::from_secs(10))
+        //         .layer(TraceLayer::new_for_http())
+        //         .into_inner()
+        // )
+        // .fallback(|| async {
+        //      (StatusCode::NOT_FOUND, "nothing to see here")
+        // });
+        // .fallback_service(
+        //     Router::new().nest_service("/static", serve_dir)
+        // );
 
     axum::Server::bind(&(addr.parse().unwrap()))
         .serve(router_main.into_make_service())

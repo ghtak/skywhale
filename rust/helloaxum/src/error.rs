@@ -27,7 +27,10 @@ pub enum Error{
     PathError{
         message: String,
         location: Option<String>
-    }
+    },
+
+    #[error("Method Not Allowed")]
+    MethodNotAllowed,
 }
 
 impl IntoResponse for Error{
@@ -35,6 +38,7 @@ impl IntoResponse for Error{
         let (code, message) = match self {
             Error::IoError(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
             Error::NotImplemented => (StatusCode::NOT_IMPLEMENTED, self.to_string()),
+            Error::MethodNotAllowed => (StatusCode::METHOD_NOT_ALLOWED, self.to_string()),
             _ => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),
         };
         let body = axum::Json(json!({ "error": message }));
