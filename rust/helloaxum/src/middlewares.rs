@@ -1,7 +1,10 @@
+use std::future::Future;
+use axum::extract::FromRequestParts;
 use axum::http::{Request, StatusCode};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use hyper::Body;
+use tower_cookies::Cookies;
 use tracing::log::debug;
 use crate::error::Error;
 
@@ -12,6 +15,7 @@ pub async fn log_req_res(
     let method = req.method().clone();
     let path = req.uri().clone();
     let (parts, body) = req.into_parts();
+
     let bytes = match hyper::body::to_bytes(body).await {
         Ok(bytes) => bytes,
         Err(err) => {

@@ -1,4 +1,5 @@
 use std::io;
+
 use axum::http::Uri;
 use axum::response::{IntoResponse, Response};
 use hyper::StatusCode;
@@ -8,12 +9,15 @@ use thiserror::Error;
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Error, Debug)]
-pub enum Error{
-    #[error("io::Error {0:?}",)]
+pub enum Error {
+    #[error("io::Error {0:?}", )]
     IoError(#[from] io::Error),
 
     #[error("Not Implemented")]
     NotImplemented,
+
+    #[error("Auth Failed, AuthToken Not Exist")]
+    AuthTokenNotExist,
 
     #[error("JsonDataError {0}")]
     JsonDataError(String),
@@ -25,9 +29,9 @@ pub enum Error{
     JsonRejection(String),
 
     #[error("PathError {message} {location:?}")]
-    PathError{
+    PathError {
         message: String,
-        location: Option<String>
+        location: Option<String>,
     },
 
     #[error("Method Not Allowed")]
@@ -40,7 +44,7 @@ pub enum Error{
     UnhandledError(Box<dyn std::error::Error>),
 }
 
-impl IntoResponse for Error{
+impl IntoResponse for Error {
     fn into_response(self) -> Response {
         let (code, message) = match self {
             Error::IoError(_) => (StatusCode::INTERNAL_SERVER_ERROR, self.to_string()),

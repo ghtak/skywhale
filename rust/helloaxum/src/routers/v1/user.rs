@@ -5,6 +5,8 @@ use serde::{
     Deserialize,
     Serialize,
 };
+use tower_cookies::Cookies;
+use tracing::debug;
 use uuid::Uuid;
 
 use crate::customext;
@@ -12,7 +14,10 @@ use crate::customext::FallbackCustomMethodNotAllowed;
 use crate::dtos::user::{User, Users};
 use crate::error::{Error, Result};
 
-async fn users() -> Result<Json<Users>> {
+async fn users(
+    cookies: Cookies,
+) -> Result<Json<Users>> {
+    debug!("{cookies:?}");
     Ok(
         Json::from(Users {
             count: 2,
@@ -47,11 +52,11 @@ async fn path_test(customext::Path(params): customext::Path<Param>) -> Result<&'
 
 pub fn router() -> Router {
     Router::new()
-        .route("/api/v1/user",
+        .route("/v1/user",
                get(users)
                    .post(create_user))
-        .route("/api/v1/user/:id", get(user_detail))
-        .route("/api/v1/user/path_test/:a_id/:b_id", get(path_test))
+        .route("/v1/user/:id", get(user_detail))
+        .route("/v1/user/path_test/:a_id/:b_id", get(path_test))
 }
 
 #[derive(Debug, Deserialize, Serialize)]
