@@ -24,47 +24,7 @@ mod utils;
 mod routers;
 mod dtos;
 mod customext;
-
-async fn handle_404() -> (StatusCode, &'static str) {
-    (StatusCode::NOT_FOUND, "Not found")
-}
-
-async fn handle_error(err: BoxError) -> Error {
-    Error::UnhandledError(err)
-}
-
-async fn handle_middleware(
-    req: Request<Body>,
-    next: Next<Body>) -> axum::response::Response
-{
-    let method = req.method().clone();
-    let path = req.uri().clone();
-    let (parts,body) = req.into_parts();
-    let bytes = match hyper::body::to_bytes(body).await {
-        Ok(bytes) => bytes,
-        Err(err) => {
-            return Error::UnhandledError(Box::try_from(err).unwrap()).into_response();
-        }
-    };
-    if let Ok(body) = std::str::from_utf8(&bytes) {
-        tracing::info!("{} {} {}", method, path, body);
-    } else {
-        tracing::info!("{} {}", method, path);
-    }
-
-    let res = next.run(Request::from_parts(parts, Body::from(bytes))).await;
-    let (parts,body) = res.into_parts();
-    let res = Response::from_parts(parts, body);
-
-    tracing::info!("{} {} {}", method, path, res.status());
-
-    if res.status() == StatusCode::METHOD_NOT_ALLOWED {
-        Error::MethodNotAllowed.into_response()
-    } else {
-        res
-    }
-}
-
+mod middlewares;
 
 #[tokio::main]
 async fn main() {
@@ -78,17 +38,14 @@ async fn main() {
     let addr = format!("0.0.0.0:{}", port);
 
     let serve_dir = ServeDir::new("static")
-        .not_found_service(
-            (|uri: Uri| async move {
-                Error::NotFound(uri)
-            }).into_service());
-
+        .not_found_service((|uri: Uri| async move { Error::NotFound }).into_service());
 
     let router_main = Router::new()
         .route("/", get(hello_axum))
-        .nest_service("/api/v1/user", routers::v1::user::router())
-        .nest_service("/api/v1/login", routers::v1::login::router())
-        .layer(middleware::from_fn(handle_middleware))
+        .merge(routers::v1::user::router())
+        .merge(routers::v1::login::router())
+        .layer(middleware::from_fn(middlewares::log_req_res))
+        .layer(middleware::map_response(middlewares::response_mapper)) //.layer(middleware::from_fn(middlewares::error_mapper))
         .fallback_service(
             Router::new().nest_service("/static", serve_dir)
         );

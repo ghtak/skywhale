@@ -33,8 +33,8 @@ pub enum Error{
     #[error("Method Not Allowed")]
     MethodNotAllowed,
 
-    #[error("Not Found{0:?}")]
-    NotFound(Uri),
+    #[error("Not Found")]
+    NotFound,
 
     #[error("Unhandled Error {0:?}")]
     UnhandledError(Box<dyn std::error::Error>),

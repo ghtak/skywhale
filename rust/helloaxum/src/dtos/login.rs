@@ -2,8 +2,8 @@ use serde::{
     Serialize, Deserialize
 };
 
-#[derive(Deserialize)]
-pub struct LoginReq{
+#[derive(Debug,Deserialize)]
+pub struct LoginPayload{
     email: String,
     password: String
 }

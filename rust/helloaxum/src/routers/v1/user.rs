@@ -47,11 +47,11 @@ async fn path_test(customext::Path(params): customext::Path<Param>) -> Result<&'
 
 pub fn router() -> Router {
     Router::new()
-        .route("/",
+        .route("/api/v1/user",
                get(users)
                    .post(create_user))
-        .route("/:id", get(user_detail))
-        .route("/path_test/:a_id/:b_id", get(path_test))
+        .route("/api/v1/user/:id", get(user_detail))
+        .route("/api/v1/user/path_test/:a_id/:b_id", get(path_test))
 }
 
 #[derive(Debug, Deserialize, Serialize)]
