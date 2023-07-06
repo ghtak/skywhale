@@ -13,11 +13,13 @@ use crate::customext;
 use crate::customext::FallbackCustomMethodNotAllowed;
 use crate::dtos::user::{User, Users};
 use crate::error::{Error, Result};
+use crate::middleware::auth::SessionSample;
 
 async fn users(
-    cookies: Cookies,
+    //cookies: Cookies,
+    session: SessionSample,
 ) -> Result<Json<Users>> {
-    debug!("{cookies:?}");
+    debug!("{session:?}");
     Ok(
         Json::from(Users {
             count: 2,
