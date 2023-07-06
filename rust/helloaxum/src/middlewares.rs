@@ -19,7 +19,9 @@ pub async fn log_req_res(
     let bytes = match hyper::body::to_bytes(body).await {
         Ok(bytes) => bytes,
         Err(err) => {
-            return Error::UnhandledError(Box::try_from(err).unwrap()).into_response();
+            return Error::UnhandledError(
+                format!("{:?}", err)
+            ).into_response();
         }
     };
     if let Ok(body) = std::str::from_utf8(&bytes) {

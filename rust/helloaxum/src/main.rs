@@ -52,6 +52,8 @@ async fn main() {
         .nest("/api", api_routers)
         .layer(axum::middleware::from_fn(middlewares::log_req_res))
         .layer(axum::middleware::map_response(middlewares::response_mapper)) //.layer(middleware::from_fn(middlewares::error_mapper))
+        .route_layer( axum::middleware::from_fn(
+            crate::middleware::auth::session_resolver))
         .layer(CookieManagerLayer::new())
         .fallback_service(
             Router::new().nest_service("/static", serve_dir)

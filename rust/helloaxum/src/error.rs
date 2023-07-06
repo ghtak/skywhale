@@ -4,14 +4,14 @@ use axum::http::Uri;
 use axum::response::{IntoResponse, Response};
 use hyper::StatusCode;
 use serde_json::json;
-use thiserror::Error;
+use thiserror;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Error, Debug)]
+#[derive(thiserror::Error, Debug, Clone)]
 pub enum Error {
-    #[error("io::Error {0:?}", )]
-    IoError(#[from] io::Error),
+    #[error("io::Error {0}")]
+    IoError(String),
 
     #[error("Not Implemented")]
     NotImplemented,
@@ -40,8 +40,8 @@ pub enum Error {
     #[error("Not Found")]
     NotFound,
 
-    #[error("Unhandled Error {0:?}")]
-    UnhandledError(Box<dyn std::error::Error>),
+    #[error("Unhandled Error {0}")]
+    UnhandledError(String),
 }
 
 impl IntoResponse for Error {
@@ -57,3 +57,10 @@ impl IntoResponse for Error {
     }
 }
 
+impl From<io::Error> for Error {
+    fn from(value: io::Error) -> Self {
+        Error::IoError(
+            format!("{value:?}")
+        )
+    }
+}
