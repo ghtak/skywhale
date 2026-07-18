@@ -68,3 +68,10 @@ assertion that an unhandled `Other` error is logged exactly once.
 `#[non_exhaustive]` allows future policy-relevant variants without requiring
 external consumers to match the enum exhaustively. The error string is
 diagnostic context only; callers must not branch on it.
+
+## Implementation verification
+
+The core contract exposes only `Error::Other` initially. A future variant must
+document the caller policy it enables and include a test for that policy. An
+unhandled `Other` error is logged once by the application entry point; core and
+adapters do not emit duplicate logs for it.
