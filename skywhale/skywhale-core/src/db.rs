@@ -9,6 +9,27 @@ use sqlx::Acquire;
 
 use crate::{DatabaseConfig, Result, error::into_db_error};
 
+/// Classifies database-driver errors retained in [`crate::Error::Database`].
+///
+/// Import this trait only at boundaries that need to translate a technical
+/// database failure into a domain error such as `AlreadyExists`.
+pub trait DatabaseErrorExt {
+    fn is_unique_violation(&self) -> bool;
+}
+
+impl DatabaseErrorExt for crate::Error {
+    fn is_unique_violation(&self) -> bool {
+        let crate::Error::Database(error) = self else {
+            return false;
+        };
+
+        matches!(
+            error.downcast_ref::<sqlx::Error>(),
+            Some(sqlx::Error::Database(database_error)) if database_error.is_unique_violation()
+        )
+    }
+}
+
 /// An executor adapter over a [`DbSession`].
 #[derive(Debug)]
 pub struct ExecutorImpl<'h, 'c, DB>
@@ -215,7 +236,7 @@ pub mod mysql {
 mod tests {
     use sqlx::Row;
 
-    use super::Database;
+    use super::{Database, DatabaseErrorExt};
     use crate::{DatabaseConfig, Result, error::into_db_error};
 
     type TestDatabase = Database<sqlx::Sqlite>;
@@ -332,5 +353,35 @@ mod tests {
 
         let mut pool = database.pool();
         assert_eq!(row_count(&mut pool).await.unwrap(), 1);
+    }
+
+    #[test]
+    fn non_database_errors_are_not_unique_violations() {
+        let error = crate::Error::Other(anyhow::anyhow!("unexpected failure"));
+
+        assert!(!error.is_unique_violation());
+    }
+
+    #[tokio::test]
+    async fn sqlite_unique_constraint_is_classified() {
+        let database = database().await;
+        let mut session = database.pool();
+        execute(
+            &mut session,
+            "create table sample (id integer primary key, name text unique not null)",
+        )
+        .await
+        .unwrap();
+        execute(&mut session, "insert into sample (name) values ('same')")
+            .await
+            .unwrap();
+
+        let error = sqlx::query("insert into sample (name) values ('same')")
+            .execute(session.executor())
+            .await
+            .map_err(into_db_error)
+            .unwrap_err();
+
+        assert!(error.is_unique_violation());
     }
 }

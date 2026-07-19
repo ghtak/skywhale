@@ -2,92 +2,70 @@
 
 ## Purpose
 
-`skywhale_core::db` provides a stable boundary between repositories and SQLx
-execution types. Repositories depend on `DbSession`, not directly on
-`sqlx::Pool`, `sqlx::Transaction`, or `sqlx::pool::PoolConnection`.
-
-The application/service layer chooses the execution context. This keeps the
-choice of pooling, connection affinity, and transaction scope outside the
-repository boundary while allowing repository methods to retain one parameter
-shape.
-
-```rust
-async fn find_user(
-    &self,
-    session: &mut skywhale_core::db::sqlite::DbSession<'_>,
-    id: i64,
-) -> skywhale_core::Result<User> {
-    sqlx::query_as("select id, name from users where id = ?")
-        .bind(id)
-        .fetch_one(session.executor())
-        .await
-        .map_err(/* convert sqlx::Error to the application error */)
-}
-```
+`skywhale_core::db` is the boundary between repositories and SQLx execution
+types. A repository accepts `&mut DbSession`, while the application layer
+chooses whether the operation uses a pool, a checked-out connection, or a
+transaction. Repositories therefore do not depend directly on SQLx's
+`Pool`, `Transaction`, or `PoolConnection` types.
 
 ## Execution contexts
 
-`Database<DB>` creates one of the following `DbSession` variants.
-
 | Entry point | Variant | Intended use |
 | --- | --- | --- |
-| `database.pool()` | `DbSession::Pool` | Ordinary repository work. SQLx selects a pooled connection per operation. |
-| `database.conn().await` | `DbSession::Conn` | Work that must retain one checked-out connection. |
-| `database.tx().await` | `DbSession::Tx` | Atomic work that must commit or roll back together. |
+| `database.pool()` | `DbSession::Pool` | Ordinary repository work; SQLx acquires pooled connections as needed. |
+| `database.conn().await` | `DbSession::Conn` | Work that needs one checked-out connection. |
+| `database.tx().await` | `DbSession::Tx` | Work that must be committed or rolled back atomically. |
 
-All variants expose `session.executor()`, which implements `sqlx::Executor`.
-Therefore a repository method accepts a single `&mut DbSession` argument and
-does not need overloads or a generic parameter for each SQLx concrete type.
+Each context exposes `session.executor()`. It forwards the SQLx `Executor`
+operations used by repository queries, giving repositories one parameter
+shape regardless of the context selected by their caller.
 
-## Transaction policy
+`begin()` starts a transaction from a pool or connection, or a nested
+transaction from an existing transaction. `commit(self)` and `rollback(self)`
+perform database work for `Tx` and intentionally return `Ok(())` for `Pool`
+and `Conn`, preserving the common boundary type. Code that requires atomicity
+must obtain a transaction through `tx()` or `begin()` before calling a
+repository.
 
-`DbSession::begin()` starts a transaction from a pool or connection, or a
-nested transaction from an existing transaction. Nested transactions rely on
-the SQLx driver's savepoint behavior.
+## SQLx compatibility
 
-`commit(self)` and `rollback(self)` consume the session.
+The module targets SQLx 0.8. `Transaction` and `PoolConnection` do not
+directly implement `Executor`; they dereference to the underlying connection.
+`ExecutorImpl` keeps that compatibility detail local by forwarding through
+`&mut **transaction` and `&mut **connection`.
 
-- For `DbSession::Tx`, they issue SQLx commit or rollback operations.
-- For `DbSession::Pool` and `DbSession::Conn`, they intentionally return
-  `Ok(())` without issuing database work.
+`ExecutorImpl` is public only as the return type of `DbSession::executor()`.
+Its handle is `pub(crate)`, so callers construct it only through a session.
 
-This no-op behavior is deliberate: callers may retain the common `DbSession`
-boundary without branching on its concrete execution context. Code that
-requires transactional atomicity must obtain the context through `tx()` (or
-call `begin()`) before invoking repositories.
+## Database error classification
 
-## SQLx compatibility boundary
+SQLx failures are converted to `skywhale_core::Error::Database`, preserving
+the original `sqlx::Error` as the source. `DatabaseErrorExt` can be imported
+where a technical classification is needed:
 
-The module targets SQLx 0.8. SQLx no longer implements `Executor` directly for
-`Transaction` and `PoolConnection`; both dereference to their underlying
-connection. `ExecutorImpl` forwards transaction and connection calls through
-`&mut **transaction` and `&mut **connection` respectively. Keep this explicit
-forwarding when upgrading SQLx so that compatibility is localized to this
-module rather than spreading into repositories.
+```rust
+use skywhale_core::db::DatabaseErrorExt;
 
-`ExecutorImpl` is public only because it is the return type of the public
-`DbSession::executor()` method. Its `handle` field is `pub(crate)`, and callers
-should construct executors only through `session.executor()`.
+if error.is_unique_violation() {
+    // The service may translate this known constraint conflict to AlreadyExists.
+}
+```
 
-## Drivers and configuration
+The trait delegates to SQLx's driver-aware unique-violation classification and
+does not parse driver messages or hard-code SQLSTATE values. It should be used
+at a repository or service boundary that understands the business meaning of
+the violated constraint. Not every unique constraint means the same domain
+conflict, so this module does not automatically turn such errors into
+`AlreadyExists`.
 
-`DatabaseConfig` currently contains only the connection URL and maximum pool
-size. Type aliases are available for SQLite, PostgreSQL, and MySQL under
-`skywhale_core::db::{sqlite, postgres, mysql}`.
+## Current scope and verification
 
-Pool lifecycle tuning, driver-specific connect options, migrations, and a UOW
-convenience API are intentionally outside this module's current scope. Add
-them when an application use case requires them; they should not alter the
-repository boundary described above.
+`DatabaseConfig` currently provides a URL and maximum connection count. SQLite,
+PostgreSQL, and MySQL aliases are provided. Driver-specific connection options,
+pool lifecycle tuning, migrations, and a UOW convenience API are deferred until
+an application requires them.
 
-## Verification contract
-
-The module tests the behavior that defines this boundary:
-
-1. One repository method operates with pool, transaction, and connection
-   sessions.
-2. A committed transaction persists its change.
-3. Rolling back a nested transaction preserves the outer transaction's change.
-
-The SQLite test pool is limited to one connection because `sqlite::memory:`
-databases are connection-local.
+The test suite verifies that one repository works with all three execution
+contexts, commits persist data, nested rollback preserves outer changes, and a
+SQLite unique constraint is classified correctly. SQLite in-memory tests use a
+one-connection pool because `sqlite::memory:` is connection-local.

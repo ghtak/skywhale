@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 pub(crate) fn into_db_error(error: sqlx::Error) -> Error {
-    Error::Other(anyhow::Error::new(error))
+    Error::Database(anyhow::Error::new(error))
 }
 
 /// Errors surfaced by `skywhale-core`.
@@ -20,6 +20,13 @@ pub enum Error {
     /// The authenticated caller is not allowed to perform the operation.
     #[error("permission denied")]
     Forbidden,
+
+    /// A failure returned by the database driver.
+    ///
+    /// The source retains the original `sqlx::Error` for database-specific
+    /// classification at the persistence boundary.
+    #[error("database error: {0}")]
+    Database(#[source] anyhow::Error),
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),
