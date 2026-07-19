@@ -1,8 +1,22 @@
 use thiserror::Error;
 
+/// Errors surfaced by `skywhale-core`.
+///
+/// Add a dedicated variant only when callers need to distinguish the failure
+/// and take different action, such as retrying, ignoring an already-completed
+/// operation, or selecting a different control flow. Otherwise, preserve the
+/// original error and its context with [`Error::Other`].
 #[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum Error {
+    /// The operation requires authentication.
+    #[error("authentication is required")]
+    Unauthenticated,
+
+    /// The authenticated caller is not allowed to perform the operation.
+    #[error("permission denied")]
+    Forbidden,
+
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
@@ -31,5 +45,14 @@ mod tests {
 
         let error = load().expect_err("the test operation must fail");
         assert_eq!(error.to_string(), "loading account record");
+    }
+
+    #[test]
+    fn errors_match() {
+        let err = Error::Other(anyhow::anyhow!("some error"));
+        match err {
+            Error::Other(_) => print!("other error"),
+            _ => print!("wild matches"),
+        }
     }
 }
