@@ -95,6 +95,68 @@ impl ConfigLoader {
 pub struct SkywhaleConfig {
     #[serde(default)]
     pub http: HttpConfig,
+
+    #[serde(default)]
+    pub tracing: TraceConfig,
+}
+
+/// Logging and tracing output settings.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct TraceConfig {
+    /// Human-readable events written to standard error.
+    #[serde(default)]
+    pub console: Option<ConsoleTraceConfig>,
+
+    /// JSON events written to a daily-rotated file.
+    #[serde(default)]
+    pub file: Option<FileTraceConfig>,
+}
+
+/// Console tracing settings.
+#[derive(Debug, Clone, Deserialize)]
+pub struct ConsoleTraceConfig {
+    #[serde(default = "default_trace_filter")]
+    pub filter: String,
+
+    #[serde(default = "default_buffered_lines_limit")]
+    pub buffered_lines_limit: usize,
+
+    #[serde(default)]
+    pub lossy: bool,
+}
+
+impl Default for ConsoleTraceConfig {
+    fn default() -> Self {
+        Self {
+            filter: default_trace_filter(),
+            buffered_lines_limit: default_buffered_lines_limit(),
+            lossy: false,
+        }
+    }
+}
+
+/// File tracing settings.
+#[derive(Debug, Clone, Deserialize)]
+pub struct FileTraceConfig {
+    pub directory: PathBuf,
+    pub filename: String,
+
+    #[serde(default = "default_trace_filter")]
+    pub filter: String,
+
+    #[serde(default = "default_buffered_lines_limit")]
+    pub buffered_lines_limit: usize,
+
+    #[serde(default)]
+    pub lossy: bool,
+}
+
+fn default_trace_filter() -> String {
+    "info".to_owned()
+}
+
+const fn default_buffered_lines_limit() -> usize {
+    1_024
 }
 
 /// HTTP server settings for Skywhale.
@@ -235,5 +297,31 @@ mod tests {
 
         assert_eq!(config.http.host, "127.0.0.1");
         assert_eq!(config.http.port, 8080);
+        assert!(config.tracing.console.is_none());
+        assert!(config.tracing.file.is_none());
+    }
+
+    #[test]
+    fn skywhale_config_deserializes_tracing_outputs() {
+        let path = temporary_toml(
+            "[tracing.console]\nfilter = 'skywhale_core=debug'\nbuffered_lines_limit = 256\n\
+             [tracing.file]\ndirectory = 'logs'\nfilename = 'skywhale.json'\nlossy = true\n",
+        );
+        let config: SkywhaleConfig = ConfigLoader::from_file(&path)
+            .try_deserialize()
+            .expect("tracing configuration must deserialize");
+        fs::remove_file(path).expect("test configuration must be removable");
+
+        let console = config.tracing.console.expect("console configuration");
+        assert_eq!(console.filter, "skywhale_core=debug");
+        assert_eq!(console.buffered_lines_limit, 256);
+        assert!(!console.lossy);
+
+        let file = config.tracing.file.expect("file configuration");
+        assert_eq!(file.directory, std::path::PathBuf::from("logs"));
+        assert_eq!(file.filename, "skywhale.json");
+        assert_eq!(file.filter, "info");
+        assert_eq!(file.buffered_lines_limit, 1_024);
+        assert!(file.lossy);
     }
 }

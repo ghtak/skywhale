@@ -1,0 +1,21 @@
+# Copy this file to config/skywhale.toml and adjust it for the environment.
+# RUST_LOG, when set, overrides the filter of every configured tracing output.
+
+[http]
+host = "127.0.0.1"
+port = 8080
+
+# Human-readable events are written to stderr.
+[tracing.console]
+filter = "info"
+buffered_lines_limit = 1024
+lossy = false
+
+# Uncomment to write JSON events to daily-rotated files. File retention is
+# intentionally managed by the deployment environment or an external script.
+# [tracing.file]
+# directory = "logs"
+# filename = "skywhale.json"
+# filter = "info"
+# buffered_lines_limit = 8192
+# lossy = false

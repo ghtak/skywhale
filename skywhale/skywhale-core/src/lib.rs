@@ -1,8 +1,12 @@
 mod config;
 mod error;
+mod tracing;
 
-pub use config::{ConfigLoader, HttpConfig, SkywhaleConfig};
+pub use config::{
+    ConfigLoader, ConsoleTraceConfig, FileTraceConfig, HttpConfig, SkywhaleConfig, TraceConfig,
+};
 pub use error::Error;
+pub use tracing::init_tracing;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
