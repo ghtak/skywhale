@@ -1,83 +1,69 @@
 # AGENTS.md
 
-This file defines the high-level collaboration rules for humans and AI agents
-working in this repository.
+This file is a lightweight guide for humans and AI agents working in this
+repository. It describes judgement and collaboration boundaries, not a fixed
+procedure for every task.
 
 ## Purpose
 
-Use this document as a project-level guide, not a detailed playbook. It should
-help an LLM make good judgment calls without forcing every task through a heavy
-process. Detailed, repeatable workflows should live in Recipes or dedicated
-Skills. Project-specific facts, decisions, and verified examples should live
-in project knowledge or Memory docs. Agents should use those workflows and
-knowledge sources when they fit the task and the user's intent.
-
-Coding agents are execution harnesses for the user's intent. Agents must not
-begin meaningful implementation work from their own assumptions. Meaningful
-changes require either a concrete user instruction that defines the requested
-change, or user acceptance of an agent-proposed spec or plan. If the request is
-ambiguous, clarify the user's intent first, then proceed only after the user has
-accepted the intended spec or plan.
+Use this document to keep work aligned with the user's intent while preserving
+momentum. Prefer context-sensitive judgement over ceremonial process. Use a
+Recipe or dedicated Skill only when a task is high-risk, complex, or repeated
+enough that a detailed checklist genuinely helps.
 
 ## Working Principles
 
-- Clarify intent before changing code.
-- Keep work scoped to the requested goal.
-- Read existing code before changing code.
-- Prefer existing project structure, style, and module boundaries.
-- Prefer small, local changes before considering broad redesigns.
-- Implement reusable pieces when reuse is natural, but avoid speculative
-  abstraction.
-- Do not add ornamental, unrelated, or verbose implementation details on behalf
-  of the user.
-- Make architectural boundaries explicit when they matter to the requested
-  change. Keep core behavior separate from framework glue, persistence,
-  networking, external services, and other infrastructure concerns where the
-  existing codebase supports that separation.
-- Prefer dependency direction that keeps domain or core logic independent from
-  delivery mechanisms and implementation details.
-- Do not apply Clean Architecture, Hexagonal Architecture, or additional layers
-  mechanically. Use boundary-oriented structure only when it clarifies
-  ownership, reduces coupling, or improves testability for the requested work.
-- Make testability and verification part of the design.
-- Tests should cover behavior, not implementation trivia.
-- Preserve unrelated user or teammate changes.
-- Avoid broad refactors unless they are explicitly part of the task.
-- If intent or assumptions are unclear, ask the user instead of filling gaps
-  with agent-side assumptions.
-- Record assumptions, trade-offs, and residual risks clearly.
-- Treat this file as repository-level guidance for scope, intent, and judgment.
-  Treat dedicated skills and project docs as detailed workflows for specific
-  kinds of work.
-- If instructions appear to conflict, follow direct user instructions first.
-  Treat a concrete instruction to make a specific meaningful change as approval
-  for that change. Then apply this file to preserve the user's intent and
-  repository-level principles, while adapting detailed skills or project docs to
-  the task's actual scope.
+- Keep work scoped to the user's requested goal.
+- Read relevant existing code and documentation before changing them.
+- Prefer small, local changes that respect existing structure, style, and
+  module boundaries. Avoid broad refactors unless they are requested.
+- Clarify material ambiguity instead of filling it with agent assumptions.
+- Preserve unrelated user and teammate changes.
+- Scale planning, documentation, and verification to the size and risk of the
+  change. Do not create records or process merely for their own sake.
+- Keep core behavior independent from framework, persistence, networking, and
+  external-service details when the existing codebase makes that separation
+  useful. Do not add architectural layers mechanically.
+- Test behavior rather than implementation trivia when tests are warranted.
+- State important assumptions, trade-offs, and residual risks concisely.
 
-## Baseline Workflow
+## Default Flow
 
-Use this section as the repository baseline when no more specific workflow
-applies, and as the scope and judgment frame when using dedicated skills or
-project docs.
+### 1. Explore and discuss
 
-For meaningful changes, keep this shape in view:
+When the goal, constraints, or desired outcome are unclear, discuss them before
+implementation. Read-only investigation is welcome when it helps clarify the
+context.
 
-1. Understand the goal, scope, assumptions, and done criteria.
-2. For meaningful changes that are not already specified by a concrete user
-   instruction, capture the intended spec in a plan, issue, design note, PR
-   description, or concise chat summary, depending on scope, and get user
-   approval.
-3. Plan the change at the level needed for the task.
-4. Implement the smallest coherent, testable change.
-5. Verify with appropriate tests or checks. Prefer dedicated skills or project
-   docs for detailed verification workflows.
-6. Refine for clarity, simplicity, and maintainability.
-7. Review what changed, how it was verified, what residual risk remains, and
-   whether the result still matches the original intent.
+Leave a short record only when a decision, rationale, or unresolved question is
+likely to matter later. A conversation does not need to become a specification
+or a plan by default.
 
-Agents may inspect files, run non-destructive checks, reproduce issues in a
-non-destructive way, and gather context before proposing a plan. They must not
-perform meaningful changes until the intended approach has been accepted, and
-must ask first before investigation steps that mutate persisted state, depend on
-external services, perform networked actions, or have destructive side effects.
+### 2. Plan when it matters
+
+For a meaningful change without a concrete user instruction, propose a
+proportionate approach and obtain acceptance before implementing it. A concrete
+user instruction authorizes that change; make any necessary assumptions visible.
+
+Use a short chat summary for small work. Use a written plan, design note, or
+dedicated workflow only when the scope, risk, or coordination warrants it.
+
+### 3. Implement the smallest coherent change
+
+Implement only what serves the agreed goal. Favor simple, reusable pieces where
+reuse is natural, but avoid speculative abstractions and ornamental detail.
+
+### 4. Verify and report
+
+Run tests, builds, reviews, or manual checks that match the change's risk and
+surface area. Report what changed, how it was checked, and any remaining risk.
+
+## Higher-Risk Work
+
+Pause for explicit confirmation before actions that are destructive, difficult
+to reverse, mutate persistent data, depend on external services, or affect
+deployment, security, permissions, or users outside this workspace. Use a
+short checklist or dedicated workflow when it reduces the chance of a costly
+omission.
+
+Direct user instructions take precedence over this guide.
