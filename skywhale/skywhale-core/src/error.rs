@@ -1,5 +1,9 @@
 use thiserror::Error;
 
+pub(crate) fn into_db_error(error: sqlx::Error) -> Error {
+    Error::Other(anyhow::Error::new(error))
+}
+
 /// Errors surfaced by `skywhale-core`.
 ///
 /// Add a dedicated variant only when callers need to distinguish the failure

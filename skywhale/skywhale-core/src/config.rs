@@ -100,6 +100,19 @@ pub struct SkywhaleConfig {
     pub tracing: TraceConfig,
 }
 
+/// Connection-pool settings for a database integration.
+#[derive(Debug, Clone, Deserialize)]
+pub struct DatabaseConfig {
+    pub url: String,
+
+    #[serde(default = "default_database_max_connections")]
+    pub max_connections: u32,
+}
+
+const fn default_database_max_connections() -> u32 {
+    10
+}
+
 /// Logging and tracing output settings.
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct TraceConfig {

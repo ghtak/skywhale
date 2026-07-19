@@ -1,9 +1,11 @@
 mod config;
+pub mod db;
 mod error;
 mod tracing;
 
 pub use config::{
-    ConfigLoader, ConsoleTraceConfig, FileTraceConfig, HttpConfig, SkywhaleConfig, TraceConfig,
+    ConfigLoader, ConsoleTraceConfig, DatabaseConfig, FileTraceConfig, HttpConfig, SkywhaleConfig,
+    TraceConfig,
 };
 pub use error::Error;
 pub use tracing::init_tracing;
