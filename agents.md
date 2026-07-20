@@ -27,6 +27,24 @@ enough that a detailed checklist genuinely helps.
 - Test behavior rather than implementation trivia when tests are warranted.
 - State important assumptions, trade-offs, and residual risks concisely.
 
+## Development Practices
+
+- Prefer Red-Green-Refactor: write a failing behavior-focused test, make the
+  smallest change to pass it, then improve the code while tests remain green.
+  When this is impractical, use a proportionate alternative and state how the
+  change was verified.
+- Reuse existing behavior, interfaces, and utilities before adding new code.
+  Extract shared code only when the reuse is concrete; avoid speculative
+  abstractions.
+- Change existing code only within the user's explicitly requested or approved
+  scope. Obtain separate approval for compatibility-sensitive, security-,
+  data-, or broadly cross-cutting changes.
+- Keep code concise and boundaries clear. Give components focused
+  responsibilities and avoid leaking framework, persistence, network, or
+  external-service concerns into core behavior.
+- After tests pass, review the changed code and make small, behavior-preserving
+  cleanup improvements. Keep refactoring separate from unrelated feature work.
+
 ## Default Flow
 
 ### 1. Explore and discuss
