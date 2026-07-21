@@ -45,6 +45,28 @@ enough that a detailed checklist genuinely helps.
 - After tests pass, review the changed code and make small, behavior-preserving
   cleanup improvements. Keep refactoring separate from unrelated feature work.
 
+## Code Review
+
+Review changes for clear, maintainable behavior rather than stylistic
+preferences alone. Focus on whether the change:
+
+- Reduces or at least does not introduce unnecessary complexity. Prefer the
+  simplest design that satisfies the requested behavior.
+- Reuses existing logic, interfaces, utilities, and patterns when they already
+  meet the need, instead of duplicating code or creating parallel features.
+- Avoids code bloat: do not add abstractions, configuration, dependencies, or
+  generalization without a concrete current use.
+- Preserves intended behavior and compatibility, including error handling and
+  meaningful edge cases.
+- Has focused responsibilities, readable names, and boundaries that fit the
+  surrounding module structure.
+- Includes proportionate tests or other verification for changed behavior, and
+  leaves no obvious correctness, security, performance, or maintainability
+  regression.
+
+Record actionable findings with their impact and a concrete recommendation;
+do not block a change for purely subjective preferences.
+
 ## Default Flow
 
 ### 1. Explore and discuss
@@ -71,10 +93,12 @@ dedicated workflow only when the scope, risk, or coordination warrants it.
 Implement only what serves the agreed goal. Favor simple, reusable pieces where
 reuse is natural, but avoid speculative abstractions and ornamental detail.
 
-### 4. Verify and report
+### 4. Verify, review, and report
 
-Run tests, builds, reviews, or manual checks that match the change's risk and
-surface area. Report what changed, how it was checked, and any remaining risk.
+Run tests, builds, code review, or manual checks that match the change's risk
+and surface area. Apply the Code Review criteria above and, when findings
+require changes, return to implementation and repeat verification. Report what
+changed, how it was checked, and any remaining risk.
 
 ## Higher-Risk Work
 

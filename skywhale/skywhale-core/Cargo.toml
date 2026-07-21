@@ -5,14 +5,17 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1"
+axum = "0.8"
 config = { version = "0.15", default-features = false, features = ["toml"] }
 futures-core = "0.3"
 serde = { version = "1", features = ["derive"] }
 sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "sqlite", "postgres", "mysql"] }
 thiserror = "2"
+tokio = { version = "1", features = ["net", "signal"] }
 tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 
 [dev-dependencies]
 tokio = { version = "1", features = ["macros", "rt"] }
+tower = { version = "0.5", features = ["util"] }

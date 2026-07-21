@@ -1,6 +1,7 @@
 mod config;
 pub mod db;
 mod error;
+pub mod http;
 mod tracing;
 
 pub use config::{
