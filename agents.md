@@ -67,6 +67,14 @@ preferences alone. Focus on whether the change:
 Record actionable findings with their impact and a concrete recommendation;
 do not block a change for purely subjective preferences.
 
+- For important module changes that affect authentication, authorization,
+  security, data, external integrations, deployment, or broad compatibility,
+  request a detailed independent review from a sub-agent or reviewer when
+  practical.
+- Independent reviews are read-only by default. The reviewer reports findings
+  with impact, file and line, rationale, and recommendation; the main worker
+  verifies findings and owns fixes, testing, and the final decision.
+
 ## Default Flow
 
 ### 1. Explore and discuss
