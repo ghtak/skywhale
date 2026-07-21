@@ -1308,6 +1308,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "skywhale-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "skywhale-core",
+ "tokio",
+ "tower",
+]
+
+[[package]]
 name = "skywhale-core"
 version = "0.1.0"
 dependencies = [
